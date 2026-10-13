@@ -19,6 +19,7 @@ class IgnoreRule:
     message_regex: re.Pattern[str] | None = None  # re.search against the formatted message
 
     def matches(self, record: logging.LogRecord) -> bool:
+        """Return True if every field set on this rule matches the record."""
         # Cheapest checks first; message formatting is deferred until needed.
         if self.logger is not None and not fnmatch.fnmatchcase(record.name, self.logger):
             return False

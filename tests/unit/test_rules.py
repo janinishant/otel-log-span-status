@@ -68,11 +68,11 @@ class TestCombinedFields:
         ],
     )
     def test_any_field_mismatch_fails(self, override):
-        fields = dict(
-            logger="app.*",
-            message_template="Failed to process %s",
-            message_regex=re.compile("order"),
-        )
+        fields = {
+            "logger": "app.*",
+            "message_template": "Failed to process %s",
+            "message_regex": re.compile("order"),
+        }
         fields.update(override)
         assert not IgnoreRule(**fields).matches(make_record())
 
