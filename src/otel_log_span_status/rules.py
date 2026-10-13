@@ -1,12 +1,9 @@
 """Ignore rules: decide whether an error-level log record should NOT mark the span as ERROR."""
 
-from __future__ import annotations
-
 import fnmatch
 import logging
 import re
 from dataclasses import dataclass
-from typing import Optional, Pattern
 
 
 @dataclass(frozen=True)
@@ -17,10 +14,10 @@ class IgnoreRule:
     Multiple rules are combined with OR by the caller.
     """
 
-    logger: Optional[str] = None  # glob against record.name, e.g. "urllib3.*"
-    message_template: Optional[str] = None  # exact match against record.msg (unformatted)
-    message_regex: Optional[Pattern[str]] = None  # re.search against the formatted message
-    exception_type: Optional[str] = None  # fully qualified name, e.g. "redis.exceptions.TimeoutError"
+    logger: str | None = None  # glob against record.name, e.g. "urllib3.*"
+    message_template: str | None = None  # exact match against record.msg (unformatted)
+    message_regex: re.Pattern[str] | None = None  # re.search against the formatted message
+    exception_type: str | None = None  # fully qualified name, e.g. "redis.exceptions.TimeoutError"
 
     def matches(self, record: logging.LogRecord) -> bool:
         # Cheapest checks first; message formatting is deferred until needed.
