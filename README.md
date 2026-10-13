@@ -32,11 +32,5 @@ logger.error("...")
         │ YES (Noisy / Handled Retry)            │ NO (Real Error)
         ▼                                        ▼
 Span Status: UNSET                       Span Status: ERROR
-(Dropped by Tail Sampler 💰)             (Kept by Tail Sampler 🔍)
+(Dropped by Tail Sampler)                (Kept by Tail Sampler)
 ```
-
-| Approach | Captures Caught Errors? | Blocks Noisy 3rd-Party Errors? | Tail-Sampling Cost |
-|---|---|---|---|
-| Standard OpenTelemetry | No (only unhandled exceptions) | N/A | Low (but misses real bugs) |
-| Naïve Logging Hook | Yes | No | Very High (false positives) |
-| **otel-log-span-status** | **Yes** | **Yes (via per-service YAML)** | **Optimal (true errors only)** |
