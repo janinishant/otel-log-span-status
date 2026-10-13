@@ -17,9 +17,6 @@ import yaml
 
 from otel_log_span_status.rules import IgnoreRule
 
-_TOP_LEVEL_KEYS = {"ignore"}
-_RULE_KEYS = {"logger", "message_template", "message_regex"}
-
 
 class ConfigError(ValueError):
     """Raised when the config file is malformed."""
@@ -39,7 +36,7 @@ def load_rules(path: str | os.PathLike[str]) -> tuple[IgnoreRule, ...]:
     if not isinstance(data, dict):
         raise ConfigError(f"{path}: top level must be a mapping, got {type(data).__name__}")
 
-    unknown = data.keys() - _TOP_LEVEL_KEYS
+    unknown = data.keys() - {"ignore"}
     if unknown:
         raise ConfigError(f"{path}: unknown top-level keys: {sorted(unknown)}")
 
@@ -51,14 +48,16 @@ def load_rules(path: str | os.PathLike[str]) -> tuple[IgnoreRule, ...]:
 
 
 def _parse_rule(entry: Any, where: str) -> IgnoreRule:
+    allowed = {"logger", "message_template", "message_regex"}
+
     if not isinstance(entry, dict):
         raise ConfigError(f"{where}: rule must be a mapping, got {type(entry).__name__}")
     if not entry:
-        raise ConfigError(f"{where}: rule must set at least one of {sorted(_RULE_KEYS)}")
+        raise ConfigError(f"{where}: rule must set at least one of {sorted(allowed)}")
 
-    unknown = entry.keys() - _RULE_KEYS
+    unknown = entry.keys() - allowed
     if unknown:
-        raise ConfigError(f"{where}: unknown keys {sorted(unknown)}; allowed: {sorted(_RULE_KEYS)}")
+        raise ConfigError(f"{where}: unknown keys {sorted(unknown)}; allowed: {sorted(allowed)}")
 
     for key, value in entry.items():
         if not isinstance(value, str) or not value:
