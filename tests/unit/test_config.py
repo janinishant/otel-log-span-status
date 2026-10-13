@@ -44,7 +44,8 @@ ignore:
 
     @pytest.mark.parametrize("content", ["", "# only a comment\n", "ignore:\n", "ignore: []\n"])
     def test_empty_means_no_rules(self, write_config, content):
-        assert load_rules(write_config(content)) == ()
+        # Compare to () rather than `not ...` so None or [] would fail the test.
+        assert load_rules(write_config(content)) == ()  # pylint: disable=use-implicit-booleaness-not-comparison
 
 
 class TestInvalidConfig:
