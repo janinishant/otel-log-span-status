@@ -10,7 +10,7 @@ Patterns listed in a YAML config are exempt, so expected or handled errors don't
 
 ## Why This Exists
 
-In OpenTelemetry, tail samplers rely on `StatusCode.ERROR` to decide which traces to keep. In real-world Python services, however, engineers rarely mutate span statuses manually—they catch exceptions, call `logger.error()`, and return a fallback response.
+In OpenTelemetry, tail samplers rely on `StatusCode.ERROR` to decide which traces to keep. In real-world Python services, however, mutating span statuses manually is painful.
 
 This creates an expensive gap between your logs and your traces:
 
