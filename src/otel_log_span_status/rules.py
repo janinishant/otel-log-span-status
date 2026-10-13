@@ -17,7 +17,6 @@ class IgnoreRule:
     logger: str | None = None  # glob against record.name, e.g. "urllib3.*"
     message_template: str | None = None  # exact match against record.msg (unformatted)
     message_regex: re.Pattern[str] | None = None  # re.search against the formatted message
-    exception_type: str | None = None  # fully qualified name, e.g. "redis.exceptions.TimeoutError"
 
     def matches(self, record: logging.LogRecord) -> bool:
         # Cheapest checks first; message formatting is deferred until needed.
@@ -27,26 +26,7 @@ class IgnoreRule:
         if self.message_template is not None and record.msg != self.message_template:
             return False
 
-        if self.exception_type is not None:
-            exc_type = record.exc_info[0] if record.exc_info else None
-            if exc_type is None or not _is_subclass_by_name(exc_type, self.exception_type):
-                return False
-
         if self.message_regex is not None and not self.message_regex.search(record.getMessage()):
             return False
 
         return True
-
-
-def _is_subclass_by_name(exc_type: type, qualified_name: str) -> bool:
-    """True if exc_type or any of its bases has the given fully qualified name.
-
-    Matching by name avoids importing the exception's module at config-load time.
-    """
-    for cls in exc_type.__mro__:
-        if f"{cls.__module__}.{cls.__qualname__}" == qualified_name:
-            return True
-        # Allow bare names for builtins: "TimeoutError" instead of "builtins.TimeoutError".
-        if cls.__module__ == "builtins" and cls.__qualname__ == qualified_name:
-            return True
-    return False
