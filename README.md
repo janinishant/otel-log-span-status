@@ -8,6 +8,25 @@ Patterns listed in a YAML config are exempt, so expected or handled errors don't
 
 > Status: early development.
 
+## Usage
+
+```python
+import otel_log_span_status
+
+otel_log_span_status.install("otel-log-span-status.yaml")
+```
+
+```yaml
+# otel-log-span-status.yaml
+ignore:
+  - logger: "urllib3.*"                      # logger name glob
+  - message_template: "Retrying request %s"  # exact match on the unformatted message
+  - logger: "payments.*"                     # fields within one rule must all match
+    message_regex: "card declined"
+```
+
+`install()` attaches a handler to the root logger. Records from any logger that propagates to root are checked. To skip a single call without a config rule, pass `extra={"span_error": False}`.
+
 ## Why This Exists
 
 In OpenTelemetry, tail samplers rely on `StatusCode.ERROR` to decide which traces to keep. In real-world Python services, however, mutating span statuses manually is painful.
