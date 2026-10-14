@@ -25,7 +25,7 @@ ignore:
     message_regex: "card declined"
 ```
 
-`install()` attaches a handler to the root logger. Records from any logger that propagates to root are checked. To skip a single call without a config rule, pass `extra={"span_error": False}`.
+The YAML is optional. If you call `install()` with no path, or the file doesn't exist, every error log marks the span; a missing file also logs a warning. `install()` attaches a handler to the root logger. Records from any logger that propagates to root are checked. To skip a single call without a config rule, pass `extra={"span_error": False}`.
 
 ## Why This Exists
 

@@ -16,11 +16,19 @@ def install(
 ) -> SpanStatusHandler:
     """Attach a SpanStatusHandler to `logger` (the root logger by default).
 
-    Rules are loaded from `config_path` if given; a missing or malformed file raises.
-    Calling install() again replaces the previously installed handler, so it can be
-    used to reload the config.
+    The config is optional: with no `config_path`, or if the file doesn't exist, no
+    ignore rules apply. A malformed file still raises ConfigError. Calling install()
+    again replaces the previously installed handler, so it can be used to reload the
+    config.
     """
-    rules = load_rules(config_path) if config_path is not None else ()
+    rules: tuple[IgnoreRule, ...] = ()
+    if config_path is not None:
+        try:
+            rules = load_rules(config_path)
+        except FileNotFoundError:
+            logging.getLogger(__name__).warning(
+                "Config %s not found; installing with no ignore rules", config_path
+            )
     target = logger if logger is not None else logging.getLogger()
 
     for existing in [h for h in target.handlers if isinstance(h, SpanStatusHandler)]:
