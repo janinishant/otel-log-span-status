@@ -16,7 +16,10 @@ def install(
 ) -> SpanStatusHandler:
     """Attach a SpanStatusHandler to `logger` (the root logger by default).
 
-    Rules are loaded from `config_path` if given; a missing or malformed file raises.
+    With no `config_path` there are no ignore rules, so every error log marks the span.
+    If `config_path` is given, the file must exist and be valid; otherwise this raises
+    FileNotFoundError or ConfigError and leaves any existing handler in place.
+
     Calling install() again replaces the previously installed handler, so it can be
     used to reload the config.
     """
