@@ -3,25 +3,10 @@ import re
 from unittest import mock
 
 import pytest
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.trace import StatusCode
 
 from otel_log_span_status.handler import SpanStatusHandler
 from otel_log_span_status.rules import IgnoreRule
-
-
-@pytest.fixture
-def exporter():
-    return InMemorySpanExporter()
-
-
-@pytest.fixture
-def tracer(exporter):
-    provider = TracerProvider()
-    provider.add_span_processor(SimpleSpanProcessor(exporter))
-    return provider.get_tracer(__name__)
 
 
 @pytest.fixture
