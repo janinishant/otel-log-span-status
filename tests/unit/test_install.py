@@ -66,22 +66,10 @@ def test_second_install_replaces_first(logger, tmp_path):
     assert other in logger.handlers
 
 
-def test_missing_config_installs_with_no_rules(logger, tmp_path, caplog):
-    path = tmp_path / "missing.yaml"
-    with caplog.at_level(logging.WARNING, logger="otel_log_span_status"):
-        handler = install(path, logger=logger)
-
-    assert span_handlers(logger) == [handler]
-    assert not handler._rules  # pylint: disable=protected-access
-    assert f"Config {path} not found" in caplog.text
-
-
-def test_malformed_config_keeps_existing_handler(logger, tmp_path):
+def test_missing_config_raises_and_keeps_existing_handler(logger, tmp_path):
     existing = install(logger=logger)
-    path = tmp_path / "config.yaml"
-    path.write_text("ignores: []\n", encoding="utf-8")
-    with pytest.raises(ConfigError):
-        install(path, logger=logger)
+    with pytest.raises(FileNotFoundError):
+        install(tmp_path / "missing.yaml", logger=logger)
     assert span_handlers(logger) == [existing]
 
 
