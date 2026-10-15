@@ -40,18 +40,3 @@ This creates an expensive gap between your logs and your traces:
 
 **otel-log-span-status** sits inside the Python runtime and bridges `logging` with OpenTelemetry. It promotes `logger.error()` calls to `StatusCode.ERROR` on the active span, while evaluating a fast, service-specific YAML ignore list (by logger name, raw message template, or regex) so noisy false positives never trigger tail sampling.
 
-```
-logger.error("...")
-        │
-        ▼
-┌────────────────────────────────────────────────────────┐
-│  otel-log-span-status In-Process Handler               │
-│                                                        │
-│  Matches YAML Ignore Rules?                            │
-│  (1. Logger Name ──► 2. Log Template ──► 3. Regex)     │
-└───────┬────────────────────────────────────────┬───────┘
-        │ YES (Noisy / Handled Retry)            │ NO (Real Error)
-        ▼                                        ▼
-Span Status: UNSET                       Span Status: ERROR
-(Dropped by Tail Sampler)                (Kept by Tail Sampler)
-```
