@@ -8,6 +8,8 @@ Patterns listed in a YAML config are exempt, so expected or handled errors don't
 
 > Status: early development.
 
+![Animated walkthrough: why tail samplers drop traces whose errors only reach the logs, installing otel-log-span-status, a four-line setup that marks the active span as ERROR, and YAML ignore rules that keep expected errors from doing the same](docs/demo.gif)
+
 ## Usage
 
 ```python
