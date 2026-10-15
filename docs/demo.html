@@ -1,0 +1,587 @@
+<title>otel-log-span-status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400&display=swap">
+<style>
+/* Layout: one 16:9 stage (fixed 960x540 coordinates, scaled to fit) with four scenes on a single seekable GSAP timeline; caption line under each scene in the 3b1b manner. Deliberately dark-only. */
+:root {
+  --bg: #08080a;
+  --stage: #0c0c0f;
+  --panel: #111115;
+  --line: #24242b;
+  --line-soft: #1a1a20;
+  --fg: #ececf1;
+  --muted: #8b8b96;
+  --faint: #4d4d57;
+  --blue: #58c4dd;
+  --yellow: #e8c46a;
+  --red: #fc6255;
+  --green: #83c167;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--fg); }
+body { font: 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 56px; display: grid; gap: 20px; }
+
+header { display: grid; gap: 6px; }
+h1 { margin: 0; font: 600 22px/1.2 var(--mono); letter-spacing: -0.01em; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+.viewport { position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden;
+  background: var(--stage); border: 1px solid var(--line); border-radius: 12px; }
+.stage { position: absolute; left: 0; top: 0; width: 960px; height: 540px; transform-origin: 0 0; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.btn { font: 500 13px var(--sans); color: var(--fg); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--faint); }
+.btn:focus-visible, .chap:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.chaps { display: flex; flex-wrap: wrap; gap: 4px; }
+.chap { font: 500 12px var(--mono); color: var(--muted); background: none; border: 1px solid transparent;
+  border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.chap[aria-current="true"] { color: var(--fg); border-color: var(--line); background: var(--panel); }
+.bar { flex: 1 1 160px; height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; min-width: 0; }
+.bar i { display: block; height: 100%; width: 0; background: var(--fg); }
+.install { display: flex; align-items: center; gap: 10px; font: 13px var(--mono); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px 8px 14px; width: fit-content; max-width: 100%; }
+.install code { color: var(--fg); overflow-x: auto; white-space: nowrap; min-width: 0; }
+
+/* ---------- stage primitives ---------- */
+.scene { position: absolute; inset: 0; }
+.h { opacity: 0; visibility: hidden; }
+.abs { position: absolute; }
+.tag { position: absolute; left: 28px; top: 22px; font: 500 11px var(--mono); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--faint); }
+.cap { position: absolute; left: 60px; right: 60px; top: 452px; text-align: center;
+  font: 400 23px/1.35 var(--serif); color: var(--fg); text-wrap: balance; }
+.cap .r { color: var(--red); } .cap .g { color: var(--green); } .cap .y { color: var(--yellow); } .cap .b { color: var(--blue); }
+.cap code { font: 500 19px var(--mono); }
+
+.panel { position: absolute; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.panel-h { display: flex; justify-content: space-between; gap: 10px; padding: 10px 14px;
+  border-bottom: 1px solid var(--line); font: 500 12px var(--mono); color: var(--muted); }
+.panel-h b { font-weight: 500; color: var(--fg); }
+.dots { display: flex; gap: 6px; align-items: center; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.mono { font-family: var(--mono); }
+
+.chip { display: inline-flex; align-items: center; font: 600 10.5px/1 var(--mono); letter-spacing: .06em;
+  padding: 4px 7px; border-radius: 4px; border: 1px solid var(--line); background: var(--line-soft); color: var(--muted); white-space: nowrap; }
+.chip.err { color: var(--red); border-color: rgba(252, 98, 85, .45); background: rgba(252, 98, 85, .12); }
+.chip.ok { color: var(--green); border-color: rgba(131, 193, 103, .45); background: rgba(131, 193, 103, .12); }
+.swap { position: relative; display: inline-grid; }
+.swap > * { grid-area: 1 / 1; }
+
+/* scene 1: trace waterfall */
+.wf { padding: 6px 0 10px; }
+.wf-row { display: grid; grid-template-columns: 128px 1fr 62px; align-items: center; gap: 12px; padding: 9px 14px; font: 12px var(--mono); }
+.wf-row .n { color: var(--fg); white-space: nowrap; }
+.wf-row .n.c { padding-left: 14px; color: var(--muted); }
+.track { position: relative; height: 8px; background: var(--line-soft); border-radius: 2px; }
+.track i { position: absolute; top: 0; bottom: 0; background: #2f3b46; border-radius: 2px; }
+.ring { position: absolute; inset: -5px; border: 1.5px solid var(--yellow); border-radius: 7px; }
+.lvl { color: var(--red); font-weight: 600; margin-right: 10px; }
+.dim { color: var(--muted); }
+.kick { position: absolute; font: 11px var(--mono); color: var(--faint); letter-spacing: .04em; }
+.kick b { font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.lrows { padding: 6px 0 10px; }
+.lr { display: grid; grid-template-columns: 52px 76px 1fr; align-items: center; height: 38px; padding: 0 14px; font: 12px var(--mono); white-space: nowrap; }
+.lr.err { background: rgba(252, 98, 85, .07); box-shadow: inset 2px 0 0 var(--red); }
+.wf-row { height: 38px; padding-block: 0; box-sizing: border-box; }
+.link { position: absolute; border-top: 1.5px dashed var(--yellow); transform-origin: 0 50%; }
+.link-l { position: absolute; text-align: center; font: 10.5px var(--mono); color: var(--yellow); }
+.srow { display: flex; align-items: center; gap: 16px; padding: 12px 14px; font: 12px var(--mono); }
+.srow b { font-weight: 500; }
+.srow .chip { margin-left: auto; }
+.lnote { position: absolute; font: 11.5px/1.6 var(--mono); color: var(--faint); }
+svg.over { position: absolute; inset: 0; width: 960px; height: 540px; overflow: visible; pointer-events: none; }
+
+/* terminal + editor */
+.term, .code { font: 13px/26px var(--mono); padding: 14px 0; }
+.term .l { padding: 0 18px; white-space: pre; }
+.prompt { color: var(--green); }
+.ch { display: none; }
+.caret { display: none; width: 7px; height: 15px; margin-left: 1px; vertical-align: -2px; background: var(--fg); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.code .ln { position: relative; display: flex; white-space: pre; padding-right: 12px; }
+.code .gut { width: 38px; flex: none; text-align: right; padding-right: 16px; color: var(--faint); }
+.kw { color: var(--blue); } .fn { color: var(--yellow); } .str { color: #a6d189; } .p { color: var(--muted); }
+.hl { position: absolute; inset: 0; background: rgba(252, 98, 85, .09); border-left: 2px solid var(--red); }
+
+.kv { display: grid; grid-template-columns: 112px 1fr; align-items: center; gap: 10px; padding: 11px 16px;
+  font: 12px var(--mono); border-bottom: 1px solid var(--line-soft); }
+.kv:last-child { border-bottom: 0; }
+.kv > span:first-child { color: var(--muted); }
+.note { font: 11px var(--mono); color: var(--faint); padding: 10px 16px 0; }
+
+/* scene 4: rules */
+.card { position: absolute; left: 0; top: 0; width: 240px; height: 68px; padding: 10px 12px; box-sizing: border-box;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; transform-origin: 0 0; display: grid; gap: 4px; }
+.card .lg { font: 11px var(--mono); color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.card .lg em { font-style: normal; color: var(--red); font-weight: 600; }
+.card .m { font: 12px var(--mono); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rule { position: absolute; left: 12px; right: 12px; height: 46px; display: flex; align-items: center; gap: 10px;
+  padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font: 11px var(--mono); color: var(--fg); background: var(--stage); }
+.rule .k { color: var(--blue); }
+.rule .v { color: #a6d189; }
+.rule .idx { color: var(--faint); width: 10px; }
+.rule .rhl { position: absolute; inset: -1px; border: 1px solid var(--yellow); border-radius: 6px; background: rgba(232, 196, 106, .07); }
+.mark { position: absolute; right: 12px; top: 50%; translate: 0 -50%; font: 600 13px var(--mono); }
+.mark.yes { color: var(--yellow); } .mark.no { color: var(--faint); }
+.out-h { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font: 12px var(--mono); color: var(--muted); }
+.edge { position: absolute; font: 10.5px var(--mono); color: var(--faint); }
+
+/* scene 1: volume and the sampler */
+canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; pointer-events: none; }
+.stat { display: grid; gap: 4px; padding: 12px 14px; font: 11px var(--mono); color: var(--muted); }
+.big { font: 600 20px/1.2 var(--mono); color: var(--fg); font-variant-numeric: tabular-nums; }
+.meter { display: block; height: 4px; margin-top: 6px; background: var(--line-soft); border-radius: 2px; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 100%; background: var(--muted); }
+.gate { position: absolute; width: 6px; background: var(--blue); border-radius: 3px; }
+.gate-l { position: absolute; text-align: center; font: 500 11px var(--mono); color: var(--blue); }
+.gate-stem { position: absolute; width: 0; border-left: 1px dashed var(--faint); }
+.crit { position: relative; display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 12px;
+  height: 34px; padding: 0 14px; font: 12px var(--mono); }
+.crit:last-child { margin-bottom: 6px; }
+.crit > i { width: 8px; height: 8px; border-radius: 50%; }
+.chl { position: absolute; inset: 0 6px; border: 1px solid rgba(252, 98, 85, .5); border-radius: 6px; background: rgba(252, 98, 85, .08); }
+
+@media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+</style>
+
+<main>
+  <header>
+    <h1>otel-log-span-status</h1>
+    <p>Marks the active OpenTelemetry span as ERROR when an error-level log is emitted, so tail samplers keep the traces that matter. A YAML ignore list keeps expected errors from doing the same.</p>
+  </header>
+
+  <div class="viewport" id="viewport" aria-label="Animated walkthrough of otel-log-span-status" role="img">
+    <div class="stage" id="stage">
+
+      <!-- 01 why tail sampling -->
+      <section class="scene" id="s0">
+        <div class="tag">01 &nbsp;Why tail sampling</div>
+        <div class="panel" style="left:28px;top:100px;width:132px;height:136px;">
+          <div class="panel-h"><b>services</b></div>
+          <div class="stat"><span class="big" id="s0-count">0</span><span>traces / day</span></div>
+        </div>
+        <canvas class="over" id="s0-stream" width="1920" height="1080" aria-hidden="true"></canvas>
+        <div class="gate h" id="s0-gate" style="left:466px;top:104px;height:130px;"></div>
+        <div class="gate-l h" id="s0-gate-l" style="left:399px;top:82px;width:140px;">tail sampler</div>
+        <div class="panel" id="s0-store" style="left:800px;top:100px;width:132px;height:136px;">
+          <div class="panel-h"><b>storage</b></div>
+          <div class="stat">
+            <span class="swap"><span class="big" id="s0-pct0">100%</span><span class="big h" id="s0-pct1">&asymp;7%</span></span>
+            <span>of traces stored</span>
+            <span class="meter"><i id="s0-meter"></i></span>
+          </div>
+        </div>
+        <div class="gate-stem h" id="s0-stem" style="left:469px;top:236px;height:26px;"></div>
+        <div class="panel h" id="s0-rules" style="left:300px;top:262px;width:340px;">
+          <div class="panel-h"><b>keep the trace if</b><span>decided after it ends</span></div>
+          <div class="crit h" id="s0-r0"><span class="chl h"></span><i style="background:var(--red)"></i><span>any span has status ERROR</span><span class="dim">keep</span></div>
+          <div class="crit h" id="s0-r1"><i style="background:var(--yellow)"></i><span>it took longer than 2 s</span><span class="dim">keep</span></div>
+          <div class="crit h" id="s0-r2"><i style="background:#5a5a66"></i><span>anything else</span><span class="dim">keep 1%</span></div>
+        </div>
+        <div class="cap h" id="c0a">A busy service sends <span class="b">millions of traces</span> a day.</div>
+        <div class="cap h" id="c0b">Storing every one is expensive, and most are healthy requests no one will open.</div>
+        <div class="cap h" id="c0c">A <span class="b">tail sampler</span> waits for each trace to finish, then decides whether to keep it.</div>
+        <div class="cap h" id="c0d">Its most important rule: keep any trace with a span marked <span class="r">ERROR</span>.</div>
+      </section>
+
+      <!-- 02 the gap -->
+      <section class="scene h" id="s1">
+        <div class="tag">02 &nbsp;The gap</div>
+        <div class="kick" style="left:30px;top:62px"><b>Logs</b> &nbsp;what your app wrote</div>
+        <div class="panel" id="s1-logs" style="left:30px;top:88px;width:330px;">
+          <div class="panel-h"><b>log stream</b><span>trace_id=4bf92f35</span></div>
+          <div class="lrows">
+            <div class="lr"><span class="dim">INFO</span><span class="dim">checkout</span><span>request started</span></div>
+            <div class="lr"><span class="dim">INFO</span><span class="dim">auth</span><span>token verified</span></div>
+            <div class="lr err h" id="s1-log"><span class="lvl">ERROR</span><span class="dim">payments</span><span>charge failed: 8812</span></div>
+          </div>
+        </div>
+
+        <div class="kick" style="left:450px;top:62px"><b>Distributed trace</b> &nbsp;what the sampler reads</div>
+        <div class="panel" id="s1-trace" style="left:450px;top:88px;width:480px;">
+          <div class="panel-h"><b>POST /checkout</b><span>trace_id=4bf92f35</span></div>
+          <div class="wf">
+            <div class="wf-row"><span class="n">POST /checkout</span><div class="track"><i style="left:0;width:100%"></i></div><span class="chip">UNSET</span></div>
+            <div class="wf-row"><span class="n c">auth.verify</span><div class="track"><i style="left:3%;width:18%"></i></div><span class="chip">UNSET</span></div>
+            <div class="wf-row"><span class="n c">payments.charge</span><div class="track"><i style="left:25%;width:55%"></i></div>
+              <span class="swap" style="justify-self:start"><span class="chip">UNSET</span><span class="ring h" id="s1-ring"></span></span></div>
+          </div>
+        </div>
+
+        <div class="link h" id="s1-link" style="left:362px;top:228px;width:86px;"></div>
+        <div class="link-l h" id="s1-link-l" style="left:362px;top:206px;width:86px;">same request</div>
+
+        <div class="panel h" id="s1-sampler" style="left:450px;top:286px;width:480px;">
+          <div class="srow"><b>tail sampler</b><span class="dim">any span ERROR? <span style="color:var(--fg)">no</span> &nbsp;&middot;&nbsp; slow? <span style="color:var(--fg)">no</span></span>
+            <span class="chip h" id="s1-verdict">DROPPED</span></div>
+        </div>
+        <div class="lnote h" id="s1-note" style="left:30px;top:300px;width:330px;">Logs go to a separate backend.<br>The sampler never reads them.</div>
+
+        <div class="cap h" id="c1">One request fails. The error goes to the <span class="r">logs</span>, but the <span class="y">trace</span> still says UNSET.</div>
+        <div class="cap h" id="c2">To the sampler it looks healthy, so 99 times in 100 it is dropped.</div>
+      </section>
+
+      <!-- 02 install -->
+      <section class="scene h" id="s2">
+        <div class="tag">03 &nbsp;Install</div>
+        <div class="panel" style="left:190px;top:104px;width:580px;height:230px;">
+          <div class="panel-h"><span class="dots"><i></i><i></i><i></i></span><span>zsh</span><span style="width:39px"></span></div>
+          <div class="term">
+            <div class="l"><span class="prompt">$ </span><span id="cmd"></span></div>
+            <div class="l dim h" id="o1">Collecting otel-log-span-status</div>
+            <div class="l dim h" id="o2">Requirement already satisfied: opentelemetry-api&gt;=1.20</div>
+            <div class="l dim h" id="o3">Requirement already satisfied: PyYAML&gt;=6.0</div>
+            <div class="l h" id="o4"><span style="color:var(--green)">Successfully installed</span> otel-log-span-status-0.1.0</div>
+          </div>
+        </div>
+        <div class="cap h" id="c3">One package. It only needs <code class="b">opentelemetry-api</code> and <code class="b">PyYAML</code>.</div>
+      </section>
+
+      <!-- 03 code -->
+      <section class="scene h" id="s3">
+        <div class="tag">04 &nbsp;Four lines</div>
+        <div class="panel" style="left:28px;top:96px;width:510px;">
+          <div class="panel-h"><b>app.py</b><span>python</span></div>
+          <div class="code" id="code"></div>
+        </div>
+        <div class="panel" style="left:560px;top:96px;width:372px;">
+          <div class="panel-h"><span>active span</span><b>payments.charge</b></div>
+          <div class="kv"><span>root logger</span>
+            <span class="swap"><span class="dim" id="r-h0">handlers: []</span><span class="h" id="r-h1">handlers: [<span style="color:var(--blue)">SpanStatusHandler</span>]</span></span></div>
+          <div class="kv"><span>status</span>
+            <span class="swap" style="justify-self:start"><span class="chip" id="r-s0">UNSET</span><span class="chip err h" id="r-s1">ERROR</span></span></div>
+          <div class="kv"><span>description</span>
+            <span class="swap"><span class="dim" id="r-d0">—</span><span class="h" id="r-d1">charge failed for order 8812</span></span></div>
+          <div class="kv"><span>tail sampler</span>
+            <span class="swap" style="justify-self:start"><span class="chip" id="r-k0">DROPPED</span><span class="chip ok h" id="r-k1">KEPT</span></span></div>
+          <div class="note" style="padding-bottom:12px">The span comes from your existing OTel instrumentation.</div>
+        </div>
+        <div class="cap h" id="c4"><code>install()</code> adds <span class="b">one handler</span> to the root logger.</div>
+        <div class="cap h" id="c5">An <span class="r">error log</span> now sets the active span to <span class="r">ERROR</span>.</div>
+        <div class="cap h" id="c6">So the tail sampler <span class="g">keeps</span> the trace.</div>
+      </section>
+
+      <!-- 04 rules -->
+      <section class="scene h" id="s4">
+        <div class="tag">05 &nbsp;Ignore rules</div>
+
+        <div class="panel" style="left:310px;top:136px;width:330px;height:240px;">
+          <div class="panel-h"><b>SpanStatusHandler</b><span>otel-log-span-status.yaml</span></div>
+          <div class="rule" id="rule0" style="top:56px"><span class="idx">1</span><span><span class="k">logger</span>: <span class="v">"urllib3.*"</span></span><span class="rhl h"></span></div>
+          <div class="rule" id="rule1" style="top:112px"><span class="idx">2</span><span><span class="k">message_template</span>: <span class="v">"Retrying request %s"</span></span><span class="rhl h"></span></div>
+          <div class="rule" id="rule2" style="top:168px"><span class="idx">3</span><span><span class="k">message_regex</span>: <span class="v">"card declined"</span></span><span class="rhl h"></span></div>
+        </div>
+
+        <svg class="over" aria-hidden="true">
+          <path d="M640 236 C660 236 660 200 680 200" stroke="#2c2c34" stroke-width="1.5" fill="none"/>
+          <path d="M640 276 C660 276 660 342 680 342" stroke="#2c2c34" stroke-width="1.5" fill="none"/>
+        </svg>
+        <span class="edge" style="left:646px;top:176px">match</span>
+        <span class="edge" style="left:646px;top:350px">no match</span>
+
+        <div class="panel" id="out0" style="left:680px;top:150px;width:256px;height:100px;">
+          <div class="out-h"><span>span untouched</span><span class="chip">UNSET</span></div>
+        </div>
+        <div class="panel" id="out1" style="left:680px;top:292px;width:256px;height:100px;">
+          <div class="out-h"><span>span marked</span><span class="chip err">ERROR</span></div>
+        </div>
+
+        <div class="card h" id="cardA"><span class="lg"><em>ERROR</em>urllib3.connectionpool</span><span class="m">Retrying after connection reset</span></div>
+        <div class="card h" id="cardB"><span class="lg"><em>ERROR</em>checkout.client</span><span class="m">Retrying request %s</span></div>
+        <div class="card h" id="cardC"><span class="lg"><em>ERROR</em>payments</span><span class="m">charge failed for order %s</span></div>
+
+        <div class="cap h" id="c7">Not every error log means the request failed.</div>
+        <div class="cap h" id="c8">A record that matches <span class="y">any rule</span> leaves the span alone.</div>
+        <div class="cap h" id="c9">Retries and noisy libraries don't force their traces to be kept.</div>
+        <div class="cap h" id="c10">No rule matches, so the span is marked <span class="r">ERROR</span>.</div>
+        <div class="cap h" id="c11">Real failures keep their traces. Expected noise doesn't.</div>
+      </section>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="play" type="button">Pause</button>
+    <button class="btn" id="replay" type="button">Replay</button>
+    <div class="chaps" id="chaps">
+      <button class="chap" type="button" data-label="context">Why sample</button>
+      <button class="chap" type="button" data-label="problem">The gap</button>
+      <button class="chap" type="button" data-label="install">Install</button>
+      <button class="chap" type="button" data-label="code">Code</button>
+      <button class="chap" type="button" data-label="rules">Rules</button>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+  </div>
+
+  <div class="install"><code id="pipcmd">pip install otel-log-span-status</code><button class="btn" id="copy" type="button">Copy</button></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const tok = getComputedStyle(document.documentElement);
+  const C = (n) => tok.getPropertyValue(n).trim();
+
+  // --- fit the 960x540 stage to the viewport ---
+  const vp = $('#viewport'), stage = $('#stage');
+  const fit = () => { stage.style.transform = `scale(${vp.clientWidth / 960})`; };
+  new ResizeObserver(fit).observe(vp); fit();
+
+  // --- typed text: one span per character, revealed by the timeline ---
+  function typeable(el, tokens) {
+    const chars = [];
+    for (const [cls, text] of tokens) {
+      for (const ch of text) {
+        const s = document.createElement('span');
+        s.className = 'ch' + (cls ? ' ' + cls : '');
+        s.textContent = ch;
+        el.appendChild(s);
+        chars.push(s);
+      }
+    }
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    el.appendChild(caret);
+    return { chars, caret };
+  }
+
+  const cmd = typeable($('#cmd'), [['', 'pip install otel-log-span-status']]);
+
+  const codeLines = [
+    [['kw', 'import'], ['', ' logging, otel_log_span_status']],
+    [['', 'otel_log_span_status.'], ['fn', 'install'], ['p', '('], ['str', '"otel-log-span-status.yaml"'], ['p', ')']],
+    [['', 'log = logging.'], ['fn', 'getLogger'], ['p', '('], ['str', '"payments"'], ['p', ')']],
+    [['', 'log.'], ['fn', 'error'], ['p', '('], ['str', '"charge failed for order %s"'], ['p', ', '], ['', 'order_id'], ['p', ')']],
+  ];
+  const code = $('#code');
+  const lines = codeLines.map((tokens, i) => {
+    const row = document.createElement('div');
+    row.className = 'ln';
+    row.innerHTML = `<span class="gut">${i + 1}</span>`;
+    const body = document.createElement('span');
+    row.appendChild(body);
+    code.appendChild(row);
+    return { row, ...typeable(body, tokens) };
+  });
+  const hl = document.createElement('span');
+  hl.className = 'hl h';
+  lines[3].row.prepend(hl);
+
+  // --- timeline helpers ---
+  const tl = gsap.timeline({ paused: true });
+  const show = (t, el, d = 0.4) => tl.to(el, { autoAlpha: 1, duration: d, ease: 'power1.out' }, t);
+  const hide = (t, el, d = 0.3) => tl.to(el, { autoAlpha: 0, duration: d, ease: 'power1.in' }, t);
+  const cap = (el, from, to) => {
+    tl.fromTo(el, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power2.out' }, from);
+    if (to != null) hide(to, el);
+  };
+  const swap = (t, a, b, d = 0.35) => { hide(t, a, d); show(t, b, d); };
+  const type = (t, { chars, caret }, step) => {
+    tl.set(caret, { display: 'inline-block' }, t);
+    tl.to(chars, { display: 'inline', duration: 0.001, stagger: step, ease: 'none' }, t);
+    const end = t + chars.length * step;
+    tl.set(caret, { display: 'none' }, end + 0.15);
+    return end;
+  };
+  const yellow = C('--yellow'), red = C('--red'), line = C('--line');
+
+  // ---------- 01 why tail sampling: volume, cost, the sampler's criteria ----------
+  // Each dot is one trace. Positions are a pure function of time so the timeline can seek.
+  const cv = $('#s0-stream'), cx = cv.getContext('2d');
+  cx.scale(2, 2);
+  let seed = 7;
+  const rnd = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+  const X0 = 168, GATE = 469, X1 = 796, GATE_ON = 6.4;
+  const dots = Array.from({ length: 640 }, () => {
+    const r = rnd();
+    const kind = r < 0.03 ? 'err' : r < 0.06 ? 'slow' : 'ok';
+    return { s: -4 + rnd() * 17, v: 150 + rnd() * 80, y: 116 + rnd() * 108, kind, lucky: rnd() < 0.01 };
+  });
+  const dotFill = { err: red, slow: yellow, ok: '#5a5a66' };
+  const renderStream = (t) => {
+    cx.clearRect(0, 0, 960, 540);
+    for (const d of dots) {
+      const age = t - d.s;
+      if (age < 0) continue;
+      let x = X0 + d.v * age, y = d.y, a = 1;
+      if (x > X1) continue;
+      const crossed = d.s + (GATE - X0) / d.v;
+      const kept = d.kind !== 'ok' || d.lucky;
+      if (x > GATE && crossed >= GATE_ON && !kept) {
+        const dt = t - crossed;
+        x = GATE + d.v * 0.2 * dt; y = d.y + 60 * dt * dt; a = 1 - dt / 0.6;
+        if (a <= 0) continue;
+      }
+      cx.globalAlpha = a * Math.max(0, Math.min(1, (x - X0) / 24, (X1 - x) / 24));
+      cx.fillStyle = dotFill[d.kind];
+      cx.beginPath();
+      cx.arc(x, y, d.kind === 'ok' ? 2.2 : 2.8, 0, Math.PI * 2);
+      cx.fill();
+    }
+    cx.globalAlpha = 1;
+  };
+  const clock = { t: 0 }, count = { v: 0 }, countEl = $('#s0-count');
+  renderStream(0);
+
+  tl.addLabel('context', 0);
+  tl.fromTo(clock, { t: 0 }, { t: 12.8, duration: 12.8, ease: 'none', onUpdate: () => renderStream(clock.t) }, 0);
+  tl.fromTo(count, { v: 0 }, { v: 2400000, duration: 1.8, ease: 'power2.out',
+    onUpdate: () => { countEl.textContent = Math.round(count.v).toLocaleString('en-US'); } }, 0);
+  cap('#c0a', 0.4, 3.1);
+  tl.to('#s0-store', { borderColor: yellow, duration: 0.3 }, 3.4);
+  cap('#c0b', 3.3, 5.9);
+  tl.to('#s0-store', { borderColor: line, duration: 0.3 }, 5.9);
+  show(6.1, '#s0-gate'); show(6.1, '#s0-gate-l');
+  show(6.3, '#s0-stem'); show(6.3, '#s0-rules');
+  show(6.7, '#s0-r0'); show(7.0, '#s0-r1'); show(7.3, '#s0-r2');
+  cap('#c0c', 6.2, 9.4);
+  tl.to('#s0-meter', { width: '7%', duration: 1.0, ease: 'power2.inOut' }, 7.8);
+  swap(8.0, '#s0-pct0', '#s0-pct1');
+  show(9.6, '#s0-r0 .chl', 0.3);
+  cap('#c0d', 9.6, 12.2);
+  hide(12.4, '#s0', 0.4);
+
+  // ---------- 02 the gap: the log says ERROR, the trace says UNSET ----------
+  const P = 12.9;
+  tl.addLabel('problem', P);
+  show(P, '#s1');
+  tl.fromTo('#s1-log', { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: 0.35, ease: 'power2.out' }, P + 0.5);
+  tl.fromTo('#s1-link', { autoAlpha: 0, scaleX: 0 }, { autoAlpha: 1, scaleX: 1, duration: 0.4, ease: 'power2.inOut' }, P + 0.9);
+  show(P + 1.05, '#s1-link-l', 0.3);
+  tl.fromTo('#s1-ring', { autoAlpha: 0, scale: 1.4 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'power2.out' }, P + 1.3);
+  cap('#c1', P + 0.6, P + 3.6);
+  show(P + 3.7, '#s1-sampler');
+  show(P + 3.9, '#s1-note');
+  show(P + 4.4, '#s1-verdict', 0.3);
+  tl.to('#s1-trace', { opacity: 0.35, duration: 0.6 }, P + 4.4);
+  cap('#c2', P + 3.9, P + 6.6);
+  hide(P + 6.8, '#s1', 0.4);
+
+  // ---------- 03 install ----------
+  const I = P + 7.3;
+  tl.addLabel('install', I);
+  show(I, '#s2');
+  const cmdEnd = type(I + 0.5, cmd, 0.04);
+  show(cmdEnd + 0.3, '#o1', 0.2);
+  show(cmdEnd + 0.6, '#o2', 0.2);
+  show(cmdEnd + 0.8, '#o3', 0.2);
+  show(cmdEnd + 1.2, '#o4', 0.3);
+  cap('#c3', cmdEnd + 1.3, cmdEnd + 4.1);
+  hide(cmdEnd + 4.3, '#s2', 0.4);
+
+  // ---------- 04 code + result side by side ----------
+  const S3 = cmdEnd + 4.7;
+  tl.addLabel('code', S3);
+  show(S3, '#s3');
+  let t = type(S3 + 0.5, lines[0], 0.03);
+  t = type(t + 0.15, lines[1], 0.03);
+  swap(t + 0.1, '#r-h0', '#r-h1');
+  cap('#c4', t + 0.1, t + 2.6);
+  t = type(t + 0.4, lines[2], 0.03);
+  t = type(t + 0.15, lines[3], 0.03);
+  const run = t + 0.4;
+  show(run, hl, 0.3);
+  swap(run + 0.3, '#r-s0', '#r-s1');
+  swap(run + 0.5, '#r-d0', '#r-d1');
+  cap('#c5', run + 0.3, run + 2.9);
+  swap(run + 2.7, '#r-k0', '#r-k1');
+  cap('#c6', run + 3.1, run + 5.2);
+  hide(run + 5.4, '#s3', 0.4);
+
+  // ---------- 05 ignore rules ----------
+  const S4 = run + 5.8;
+  tl.addLabel('rules', S4);
+  show(S4, '#s4');
+  const cards = ['#cardA', '#cardB', '#cardC'];
+  const queueY = [150, 232, 314];
+  cards.forEach((c, i) => {
+    gsap.set(c, { x: 30, y: queueY[i] });
+    tl.fromTo(c, { autoAlpha: 0, x: 18 }, { autoAlpha: 1, x: 30, duration: 0.4, ease: 'power2.out' }, S4 + 0.3 + i * 0.15);
+  });
+  cap('#c7', S4 + 0.6, S4 + 3.0);
+
+  const mark = (rule, ok) => {
+    const m = document.createElement('span');
+    m.className = 'mark h ' + (ok ? 'yes' : 'no');
+    m.textContent = ok ? '✓' : '✕';
+    $(rule).appendChild(m);
+    return m;
+  };
+  // card, rule checks in order (the handler stops at the first match), destination
+  const plan = [
+    { card: '#cardA', checks: [true], to: { x: 688, y: 192 } },
+    { card: '#cardB', checks: [false, true], to: { x: 812, y: 192 } },
+    { card: '#cardC', checks: [false, false, false], to: { x: 688, y: 334 } },
+  ];
+  let ct = S4 + 3.0;
+  plan.forEach(({ card, checks, to }, ci) => {
+    tl.to(card, { borderColor: yellow, duration: 0.25 }, ct);
+    const marks = [];
+    checks.forEach((ok, ri) => {
+      const at = ct + 0.35 + ri * 0.35;
+      const m = mark('#rule' + ri, ok);
+      marks.push(m);
+      show(at, m, 0.2);
+      if (ok) show(at, `#rule${ri} .rhl`, 0.25);
+    });
+    const leave = ct + 0.5 + checks.length * 0.35;
+    const matched = checks.includes(true);
+    tl.to(card, { x: to.x, y: to.y, scale: 0.5, borderColor: matched ? line : red, duration: 0.8, ease: 'power2.inOut' }, leave);
+    marks.forEach((m) => hide(leave + 0.4, m, 0.25));
+    checks.forEach((ok, ri) => { if (ok) hide(leave + 0.4, `#rule${ri} .rhl`, 0.25); });
+    if (!matched) tl.to('#out1', { borderColor: red, duration: 0.4 }, leave + 0.7);
+    if (ci === 0) cap('#c8', ct + 0.3, ct + 3.0);
+    if (ci === 1) cap('#c9', ct + 0.9, ct + 3.4);
+    if (ci === 2) cap('#c10', leave + 0.4, leave + 3.0);
+    ct = leave + (ci === 1 ? 1.6 : 1.2);
+  });
+  cap('#c11', ct + 1.6);
+  tl.to({}, { duration: 2 }, ct + 2.1);
+
+  // --- controls ---
+  const playBtn = $('#play'), prog = $('#prog');
+  const chaps = [...document.querySelectorAll('.chap')];
+  const labels = chaps.map((b) => tl.labels[b.dataset.label]);
+  const sync = () => {
+    playBtn.textContent = tl.paused() || tl.progress() === 1 ? 'Play' : 'Pause';
+    prog.style.width = (tl.progress() * 100).toFixed(2) + '%';
+    const now = tl.time();
+    let cur = 0;
+    labels.forEach((l, i) => { if (now >= l - 0.01) cur = i; });
+    chaps.forEach((b, i) => b.setAttribute('aria-current', String(i === cur)));
+  };
+  tl.eventCallback('onUpdate', sync);
+  tl.eventCallback('onComplete', sync);
+  playBtn.addEventListener('click', () => {
+    if (tl.progress() === 1) tl.restart();
+    else tl.paused(!tl.paused());
+    sync();
+  });
+  $('#replay').addEventListener('click', () => { tl.restart(); sync(); });
+  chaps.forEach((b) => b.addEventListener('click', () => { tl.seek(b.dataset.label, false).play(); sync(); }));
+
+  $('#copy').addEventListener('click', async (e) => {
+    const text = $('#pipcmd').textContent;
+    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied'; }
+    catch { const r = document.createRange(); r.selectNodeContents($('#pipcmd')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    setTimeout(() => { e.target.textContent = 'Copy'; }, 1500);
+  });
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { tl.progress(1, false).pause(); }
+  else { tl.play(); }
+  sync();
+})();
+</script>
