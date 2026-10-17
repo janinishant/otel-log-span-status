@@ -79,8 +79,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--fps", type=int, default=15)
     ap.add_argument("--out", type=Path, default=DOCS / "demo.gif")
-    ap.add_argument("--stills", help="comma-separated times in seconds; saves PNGs instead of a GIF")
-    ap.add_argument("--stills-dir", type=Path, default=Path(tempfile.gettempdir()) / "demo-stills")
+    ap.add_argument("--stills", help="comma-separated seconds; save PNG stills instead of a GIF")
+    ap.add_argument(
+        "--stills-dir", type=Path, default=Path(tempfile.gettempdir()) / "demo-stills"
+    )
     args = ap.parse_args()
 
     if args.stills:
