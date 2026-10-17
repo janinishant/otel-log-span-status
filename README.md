@@ -8,7 +8,15 @@ Patterns listed in a YAML config are exempt, so expected or handled errors don't
 
 > Status: early development.
 
-![Animated walkthrough: why tail samplers drop traces whose errors only reach the logs, installing otel-log-span-status, a four-line setup that marks the active span as ERROR, and YAML ignore rules that keep expected errors from doing the same](docs/demo.gif)
+![Animated walkthrough: why tail samplers drop traces whose errors only reach the logs, installing otel-log-span-status, a four-line setup that marks the active span as ERROR, and YAML ignore rules that keep expected errors from doing the same](https://raw.githubusercontent.com/janinishant/otel-log-span-status/main/docs/demo.gif)
+
+## Install
+
+```sh
+pip install otel-log-span-status
+```
+
+Requires Python 3.10+ and `opentelemetry-api` 1.20+. You also need an OpenTelemetry SDK configured in your service; this library only sets span status.
 
 ## Usage
 
@@ -40,3 +48,6 @@ This creates an expensive gap between your logs and your traces:
 
 **otel-log-span-status** sits inside the Python runtime and bridges `logging` with OpenTelemetry. It promotes `logger.error()` calls to `StatusCode.ERROR` on the active span, while evaluating a fast, service-specific YAML ignore list (by logger name, raw message template, or regex) so noisy false positives never trigger tail sampling.
 
+## License
+
+Apache-2.0. See [LICENSE](https://github.com/janinishant/otel-log-span-status/blob/main/LICENSE).
