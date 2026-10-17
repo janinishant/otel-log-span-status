@@ -11,8 +11,8 @@
   --line: #24242b;
   --line-soft: #1a1a20;
   --fg: #ececf1;
-  --muted: #8b8b96;
-  --faint: #4d4d57;
+  --muted: #a1a1ac;
+  --faint: #6c6c78;
   --blue: #58c4dd;
   --yellow: #e8c46a;
   --red: #fc6255;
@@ -53,8 +53,8 @@ header p { margin: 0; color: var(--muted); max-width: 62ch; }
 .scene { position: absolute; inset: 0; }
 .h { opacity: 0; visibility: hidden; }
 .abs { position: absolute; }
-.tag { position: absolute; left: 28px; top: 22px; font: 500 11px var(--mono); letter-spacing: .08em;
-  text-transform: uppercase; color: var(--faint); }
+.tag { position: absolute; left: 28px; top: 22px; font: 500 13px var(--mono); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); }
 .cap { position: absolute; left: 60px; right: 60px; top: 452px; text-align: center;
   font: 400 23px/1.35 var(--serif); color: var(--fg); text-wrap: balance; }
 .cap .r { color: var(--red); } .cap .g { color: var(--green); } .cap .y { color: var(--yellow); } .cap .b { color: var(--blue); }
@@ -62,13 +62,13 @@ header p { margin: 0; color: var(--muted); max-width: 62ch; }
 
 .panel { position: absolute; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
 .panel-h { display: flex; justify-content: space-between; gap: 10px; padding: 10px 14px;
-  border-bottom: 1px solid var(--line); font: 500 12px var(--mono); color: var(--muted); }
+  border-bottom: 1px solid var(--line); font: 500 14px var(--mono); color: var(--muted); }
 .panel-h b { font-weight: 500; color: var(--fg); }
 .dots { display: flex; gap: 6px; align-items: center; }
 .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
 .mono { font-family: var(--mono); }
 
-.chip { display: inline-flex; align-items: center; font: 600 10.5px/1 var(--mono); letter-spacing: .06em;
+.chip { display: inline-flex; align-items: center; font: 600 12.5px/1 var(--mono); letter-spacing: .06em;
   padding: 4px 7px; border-radius: 4px; border: 1px solid var(--line); background: var(--line-soft); color: var(--muted); white-space: nowrap; }
 .chip.err { color: var(--red); border-color: rgba(252, 98, 85, .45); background: rgba(252, 98, 85, .12); }
 .chip.ok { color: var(--green); border-color: rgba(131, 193, 103, .45); background: rgba(131, 193, 103, .12); }
@@ -77,7 +77,7 @@ header p { margin: 0; color: var(--muted); max-width: 62ch; }
 
 /* scene 1: trace waterfall */
 .wf { padding: 6px 0 10px; }
-.wf-row { display: grid; grid-template-columns: 128px 1fr 62px; align-items: center; gap: 12px; padding: 9px 14px; font: 12px var(--mono); }
+.wf-row { display: grid; grid-template-columns: 150px 1fr 76px; align-items: center; gap: 12px; padding: 9px 14px; font: 14px var(--mono); }
 .wf-row .n { color: var(--fg); white-space: nowrap; }
 .wf-row .n.c { padding-left: 14px; color: var(--muted); }
 .track { position: relative; height: 8px; background: var(--line-soft); border-radius: 2px; }
@@ -85,22 +85,23 @@ header p { margin: 0; color: var(--muted); max-width: 62ch; }
 .ring { position: absolute; inset: -5px; border: 1.5px solid var(--yellow); border-radius: 7px; }
 .lvl { color: var(--red); font-weight: 600; margin-right: 10px; }
 .dim { color: var(--muted); }
-.kick { position: absolute; font: 11px var(--mono); color: var(--faint); letter-spacing: .04em; }
+.kick { position: absolute; font: 13px var(--mono); color: var(--faint); letter-spacing: .04em; }
 .kick b { font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
 .lrows { padding: 6px 0 10px; }
-.lr { display: grid; grid-template-columns: 52px 76px 1fr; align-items: center; height: 38px; padding: 0 14px; font: 12px var(--mono); white-space: nowrap; }
+.lr { display: grid; grid-template-columns: 58px 84px 1fr; align-items: center; height: 38px; padding: 0 14px; font: 14px var(--mono); white-space: nowrap; }
 .lr.err { background: rgba(252, 98, 85, .07); box-shadow: inset 2px 0 0 var(--red); }
 .wf-row { height: 38px; padding-block: 0; box-sizing: border-box; }
 .link { position: absolute; border-top: 1.5px dashed var(--yellow); transform-origin: 0 50%; }
-.link-l { position: absolute; text-align: center; font: 10.5px var(--mono); color: var(--yellow); }
-.srow { display: flex; align-items: center; gap: 16px; padding: 12px 14px; font: 12px var(--mono); }
+.link-l { position: absolute; text-align: center; font: 12.5px var(--mono); color: var(--yellow); }
+.srow { display: flex; align-items: center; gap: 16px; padding: 12px 14px; font: 13px var(--mono); white-space: nowrap; }
 .srow b { font-weight: 500; }
 .srow .chip { margin-left: auto; }
-.lnote { position: absolute; font: 11.5px/1.6 var(--mono); color: var(--faint); }
+.lnote { position: absolute; font: 13.5px/1.6 var(--mono); color: var(--faint); }
 svg.over { position: absolute; inset: 0; width: 960px; height: 540px; overflow: visible; pointer-events: none; }
 
 /* terminal + editor */
-.term, .code { font: 13px/26px var(--mono); padding: 14px 0; }
+.term { font: 15px/28px var(--mono); padding: 14px 0; }
+.code { font: 14px/28px var(--mono); padding: 14px 0; }
 .term .l { padding: 0 18px; white-space: pre; }
 .prompt { color: var(--green); }
 .ch { display: none; }
@@ -111,45 +112,52 @@ svg.over { position: absolute; inset: 0; width: 960px; height: 540px; overflow: 
 .kw { color: var(--blue); } .fn { color: var(--yellow); } .str { color: #a6d189; } .p { color: var(--muted); }
 .hl { position: absolute; inset: 0; background: rgba(252, 98, 85, .09); border-left: 2px solid var(--red); }
 
-.kv { display: grid; grid-template-columns: 112px 1fr; align-items: center; gap: 10px; padding: 11px 16px;
-  font: 12px var(--mono); border-bottom: 1px solid var(--line-soft); }
+.kv { display: grid; grid-template-columns: 100px 1fr; align-items: center; gap: 10px; padding: 11px 12px;
+  font: 13px var(--mono); border-bottom: 1px solid var(--line-soft); }
 .kv:last-child { border-bottom: 0; }
 .kv > span:first-child { color: var(--muted); }
-.note { font: 11px var(--mono); color: var(--faint); padding: 10px 16px 0; }
+.note { font: 12.5px var(--mono); color: var(--faint); padding: 10px 14px 0; }
 
 /* scene 4: rules */
-.card { position: absolute; left: 0; top: 0; width: 240px; height: 68px; padding: 10px 12px; box-sizing: border-box;
+.card { position: absolute; left: 0; top: 0; width: 268px; height: 68px; padding: 10px 12px; box-sizing: border-box;
   background: var(--panel); border: 1px solid var(--line); border-radius: 8px; transform-origin: 0 0; display: grid; gap: 4px; }
-.card .lg { font: 11px var(--mono); color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.card .lg { font: 12.5px var(--mono); color: var(--muted); display: flex; gap: 8px; align-items: center; }
 .card .lg em { font-style: normal; color: var(--red); font-weight: 600; }
-.card .m { font: 12px var(--mono); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .m { font: 13px var(--mono); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rule { position: absolute; left: 12px; right: 12px; height: 46px; display: flex; align-items: center; gap: 10px;
-  padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font: 11px var(--mono); color: var(--fg); background: var(--stage); }
+  padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font: 12.5px var(--mono); color: var(--fg); background: var(--stage); }
 .rule .k { color: var(--blue); }
 .rule .v { color: #a6d189; }
 .rule .idx { color: var(--faint); width: 10px; }
 .rule .rhl { position: absolute; inset: -1px; border: 1px solid var(--yellow); border-radius: 6px; background: rgba(232, 196, 106, .07); }
-.mark { position: absolute; right: 12px; top: 50%; translate: 0 -50%; font: 600 13px var(--mono); }
+.mark { position: absolute; right: 12px; top: 50%; translate: 0 -50%; font: 600 15px var(--mono); }
 .mark.yes { color: var(--yellow); } .mark.no { color: var(--faint); }
-.out-h { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font: 12px var(--mono); color: var(--muted); }
-.edge { position: absolute; font: 10.5px var(--mono); color: var(--faint); }
+.out-h { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font: 14px var(--mono); color: var(--muted); }
+.edge { position: absolute; font: 12.5px var(--mono); color: var(--faint); }
 
 /* scene 1: volume and the sampler */
 canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; pointer-events: none; }
-.stat { display: grid; gap: 4px; padding: 12px 14px; font: 11px var(--mono); color: var(--muted); }
-.big { font: 600 20px/1.2 var(--mono); color: var(--fg); font-variant-numeric: tabular-nums; }
+.stat { display: grid; gap: 4px; padding: 12px 14px; font: 13px var(--mono); color: var(--muted); }
+.big { font: 600 22px/1.2 var(--mono); color: var(--fg); font-variant-numeric: tabular-nums; }
 .meter { display: block; height: 4px; margin-top: 6px; background: var(--line-soft); border-radius: 2px; overflow: hidden; }
 .meter i { display: block; height: 100%; width: 100%; background: var(--muted); }
 .gate { position: absolute; width: 6px; background: var(--blue); border-radius: 3px; }
-.gate-l { position: absolute; text-align: center; font: 500 11px var(--mono); color: var(--blue); }
+.gate-l { position: absolute; text-align: center; font: 500 13px var(--mono); color: var(--blue); }
 .gate-stem { position: absolute; width: 0; border-left: 1px dashed var(--faint); }
 .crit { position: relative; display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 12px;
-  height: 34px; padding: 0 14px; font: 12px var(--mono); }
+  height: 34px; padding: 0 14px; font: 14px var(--mono); }
 .crit:last-child { margin-bottom: 6px; }
 .crit > i { width: 8px; height: 8px; border-radius: 50%; }
 .chl { position: absolute; inset: 0 6px; border: 1px solid rgba(252, 98, 85, .5); border-radius: 6px; background: rgba(252, 98, 85, .08); }
 
 @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+
+/* record mode (?record): the bare stage at GIF size, no page chrome */
+.rec body { margin: 0; }
+.rec main { max-width: none; padding: 0; display: block; }
+.rec header, .rec .controls, .rec .install { display: none; }
+.rec .viewport { width: 1280px; border: 0; border-radius: 0; }
+.rec .caret { animation: none; }
 </style>
 
 <main>
@@ -164,14 +172,14 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
       <!-- 01 why tail sampling -->
       <section class="scene" id="s0">
         <div class="tag">01 &nbsp;Why tail sampling</div>
-        <div class="panel" style="left:28px;top:100px;width:132px;height:136px;">
+        <div class="panel" style="left:28px;top:100px;width:150px;height:150px;">
           <div class="panel-h"><b>services</b></div>
           <div class="stat"><span class="big" id="s0-count">0</span><span>traces / day</span></div>
         </div>
         <canvas class="over" id="s0-stream" width="1920" height="1080" aria-hidden="true"></canvas>
         <div class="gate h" id="s0-gate" style="left:466px;top:104px;height:130px;"></div>
         <div class="gate-l h" id="s0-gate-l" style="left:399px;top:82px;width:140px;">tail sampler</div>
-        <div class="panel" id="s0-store" style="left:800px;top:100px;width:132px;height:136px;">
+        <div class="panel" id="s0-store" style="left:782px;top:100px;width:150px;height:150px;">
           <div class="panel-h"><b>storage</b></div>
           <div class="stat">
             <span class="swap"><span class="big" id="s0-pct0">100%</span><span class="big h" id="s0-pct1">&asymp;7%</span></span>
@@ -179,8 +187,8 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
             <span class="meter"><i id="s0-meter"></i></span>
           </div>
         </div>
-        <div class="gate-stem h" id="s0-stem" style="left:469px;top:236px;height:26px;"></div>
-        <div class="panel h" id="s0-rules" style="left:300px;top:262px;width:340px;">
+        <div class="gate-stem h" id="s0-stem" style="left:469px;top:236px;height:30px;"></div>
+        <div class="panel h" id="s0-rules" style="left:280px;top:266px;width:380px;">
           <div class="panel-h"><b>keep the trace if</b><span>decided after it ends</span></div>
           <div class="crit h" id="s0-r0"><span class="chl h"></span><i style="background:var(--red)"></i><span>any span has status ERROR</span><span class="dim">keep</span></div>
           <div class="crit h" id="s0-r1"><i style="background:var(--yellow)"></i><span>it took longer than 2 s</span><span class="dim">keep</span></div>
@@ -196,7 +204,7 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
       <section class="scene h" id="s1">
         <div class="tag">02 &nbsp;The gap</div>
         <div class="kick" style="left:30px;top:62px"><b>Logs</b> &nbsp;what your app wrote</div>
-        <div class="panel" id="s1-logs" style="left:30px;top:88px;width:330px;">
+        <div class="panel" id="s1-logs" style="left:30px;top:88px;width:350px;">
           <div class="panel-h"><b>log stream</b><span>trace_id=4bf92f35</span></div>
           <div class="lrows">
             <div class="lr"><span class="dim">INFO</span><span class="dim">checkout</span><span>request started</span></div>
@@ -205,8 +213,8 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
           </div>
         </div>
 
-        <div class="kick" style="left:450px;top:62px"><b>Distributed trace</b> &nbsp;what the sampler reads</div>
-        <div class="panel" id="s1-trace" style="left:450px;top:88px;width:480px;">
+        <div class="kick" style="left:470px;top:62px"><b>Distributed trace</b> &nbsp;what the sampler reads</div>
+        <div class="panel" id="s1-trace" style="left:470px;top:88px;width:460px;">
           <div class="panel-h"><b>POST /checkout</b><span>trace_id=4bf92f35</span></div>
           <div class="wf">
             <div class="wf-row"><span class="n">POST /checkout</span><div class="track"><i style="left:0;width:100%"></i></div><span class="chip">UNSET</span></div>
@@ -216,14 +224,14 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
           </div>
         </div>
 
-        <div class="link h" id="s1-link" style="left:362px;top:228px;width:86px;"></div>
-        <div class="link-l h" id="s1-link-l" style="left:362px;top:206px;width:86px;">same request</div>
+        <div class="link h" id="s1-link" style="left:382px;top:228px;width:86px;"></div>
+        <div class="link-l h" id="s1-link-l" style="left:382px;top:204px;width:88px;font-size:12px;">same request</div>
 
-        <div class="panel h" id="s1-sampler" style="left:450px;top:286px;width:480px;">
-          <div class="srow"><b>tail sampler</b><span class="dim">any span ERROR? <span style="color:var(--fg)">no</span> &nbsp;&middot;&nbsp; slow? <span style="color:var(--fg)">no</span></span>
+        <div class="panel h" id="s1-sampler" style="left:470px;top:286px;width:460px;">
+          <div class="srow"><b>tail sampler</b><span class="dim">ERROR span? <span style="color:var(--fg)">no</span> &nbsp;&middot;&nbsp; slow? <span style="color:var(--fg)">no</span></span>
             <span class="chip h" id="s1-verdict">DROPPED</span></div>
         </div>
-        <div class="lnote h" id="s1-note" style="left:30px;top:300px;width:330px;">Logs go to a separate backend.<br>The sampler never reads them.</div>
+        <div class="lnote h" id="s1-note" style="left:30px;top:296px;width:350px;">Logs go to a separate backend.<br>The sampler never reads them.</div>
 
         <div class="cap h" id="c1">One request fails. The error goes to the <span class="r">logs</span>, but the <span class="y">trace</span> still says UNSET.</div>
         <div class="cap h" id="c2">To the sampler it looks healthy, so 99 times in 100 it is dropped.</div>
@@ -248,14 +256,14 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
       <!-- 03 code -->
       <section class="scene h" id="s3">
         <div class="tag">04 &nbsp;Four lines</div>
-        <div class="panel" style="left:28px;top:96px;width:510px;">
+        <div class="panel" style="left:28px;top:96px;width:552px;">
           <div class="panel-h"><b>app.py</b><span>python</span></div>
           <div class="code" id="code"></div>
         </div>
-        <div class="panel" style="left:560px;top:96px;width:372px;">
+        <div class="panel" style="left:592px;top:96px;width:340px;">
           <div class="panel-h"><span>active span</span><b>payments.charge</b></div>
           <div class="kv"><span>root logger</span>
-            <span class="swap"><span class="dim" id="r-h0">handlers: []</span><span class="h" id="r-h1">handlers: [<span style="color:var(--blue)">SpanStatusHandler</span>]</span></span></div>
+            <span class="swap"><span class="dim" id="r-h0">no handlers</span><span class="h" id="r-h1">[<span style="color:var(--blue)">SpanStatusHandler</span>]</span></span></div>
           <div class="kv"><span>status</span>
             <span class="swap" style="justify-self:start"><span class="chip" id="r-s0">UNSET</span><span class="chip err h" id="r-s1">ERROR</span></span></div>
           <div class="kv"><span>description</span>
@@ -273,24 +281,24 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
       <section class="scene h" id="s4">
         <div class="tag">05 &nbsp;Ignore rules</div>
 
-        <div class="panel" style="left:310px;top:136px;width:330px;height:240px;">
-          <div class="panel-h"><b>SpanStatusHandler</b><span>otel-log-span-status.yaml</span></div>
+        <div class="panel" style="left:300px;top:136px;width:380px;height:240px;">
+          <div class="panel-h"><b>otel-log-span-status.yaml</b><span>ignore rules</span></div>
           <div class="rule" id="rule0" style="top:56px"><span class="idx">1</span><span><span class="k">logger</span>: <span class="v">"urllib3.*"</span></span><span class="rhl h"></span></div>
           <div class="rule" id="rule1" style="top:112px"><span class="idx">2</span><span><span class="k">message_template</span>: <span class="v">"Retrying request %s"</span></span><span class="rhl h"></span></div>
           <div class="rule" id="rule2" style="top:168px"><span class="idx">3</span><span><span class="k">message_regex</span>: <span class="v">"card declined"</span></span><span class="rhl h"></span></div>
         </div>
 
         <svg class="over" aria-hidden="true">
-          <path d="M640 236 C660 236 660 200 680 200" stroke="#2c2c34" stroke-width="1.5" fill="none"/>
-          <path d="M640 276 C660 276 660 342 680 342" stroke="#2c2c34" stroke-width="1.5" fill="none"/>
+          <path d="M680 236 C690 236 690 200 700 200" stroke="#2c2c34" stroke-width="1.5" fill="none"/>
+          <path d="M680 276 C690 276 690 342 700 342" stroke="#2c2c34" stroke-width="1.5" fill="none"/>
         </svg>
-        <span class="edge" style="left:646px;top:176px">match</span>
-        <span class="edge" style="left:646px;top:350px">no match</span>
+        <span class="edge" style="left:702px;top:128px">any rule matches</span>
+        <span class="edge" style="left:702px;top:270px">no rule matches</span>
 
-        <div class="panel" id="out0" style="left:680px;top:150px;width:256px;height:100px;">
+        <div class="panel" id="out0" style="left:700px;top:150px;width:236px;height:100px;">
           <div class="out-h"><span>span untouched</span><span class="chip">UNSET</span></div>
         </div>
-        <div class="panel" id="out1" style="left:680px;top:292px;width:256px;height:100px;">
+        <div class="panel" id="out1" style="left:700px;top:292px;width:236px;height:100px;">
           <div class="out-h"><span>span marked</span><span class="chip err">ERROR</span></div>
         </div>
 
@@ -404,7 +412,7 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
     r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
   };
-  const X0 = 168, GATE = 469, X1 = 796, GATE_ON = 6.4;
+  const X0 = 186, GATE = 469, X1 = 778, GATE_ON = 6.4;
   const dots = Array.from({ length: 640 }, () => {
     const r = rnd();
     const kind = r < 0.03 ? 'err' : r < 0.06 ? 'slow' : 'ok';
@@ -508,8 +516,8 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
   const cards = ['#cardA', '#cardB', '#cardC'];
   const queueY = [150, 232, 314];
   cards.forEach((c, i) => {
-    gsap.set(c, { x: 30, y: queueY[i] });
-    tl.fromTo(c, { autoAlpha: 0, x: 18 }, { autoAlpha: 1, x: 30, duration: 0.4, ease: 'power2.out' }, S4 + 0.3 + i * 0.15);
+    gsap.set(c, { x: 20, y: queueY[i] });
+    tl.fromTo(c, { autoAlpha: 0, x: 8 }, { autoAlpha: 1, x: 20, duration: 0.4, ease: 'power2.out' }, S4 + 0.3 + i * 0.15);
   });
   cap('#c7', S4 + 0.6, S4 + 3.0);
 
@@ -522,9 +530,9 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
   };
   // card, rule checks in order (the handler stops at the first match), destination
   const plan = [
-    { card: '#cardA', checks: [true], to: { x: 688, y: 192 } },
-    { card: '#cardB', checks: [false, true], to: { x: 812, y: 192 } },
-    { card: '#cardC', checks: [false, false, false], to: { x: 688, y: 334 } },
+    { card: '#cardA', checks: [true], to: { x: 716, y: 186 } },
+    { card: '#cardB', checks: [false, true], to: { x: 716, y: 212 } },
+    { card: '#cardC', checks: [false, false, false], to: { x: 716, y: 334 } },
   ];
   let ct = S4 + 3.0;
   plan.forEach(({ card, checks, to }, ci) => {
@@ -579,6 +587,16 @@ canvas.over { position: absolute; left: 0; top: 0; width: 960px; height: 540px; 
     catch { const r = document.createRange(); r.selectNodeContents($('#pipcmd')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
     setTimeout(() => { e.target.textContent = 'Copy'; }, 1500);
   });
+
+  // ?record: show only the stage at 1280x720 and expose the paused timeline,
+  // so docs/record_demo.py can seek frame by frame and capture the GIF.
+  if (new URLSearchParams(location.search).has('record')) {
+    document.documentElement.classList.add('rec');
+    fit();
+    tl.pause(0);
+    window.__demo = tl;
+    return;
+  }
 
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { tl.progress(1, false).pause(); }
   else { tl.play(); }
