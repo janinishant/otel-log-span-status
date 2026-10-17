@@ -1,16 +1,38 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
 name = "otel-log-span-status"
 version = "0.1.0"
 description = "Mark the active OpenTelemetry span as ERROR when an error-level log is emitted, with a YAML ignore list."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Nishant Jani", email = "nishantjani10@gmail.com" }]
+keywords = ["opentelemetry", "logging", "tracing", "tail-sampling", "observability"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Monitoring",
+]
 requires-python = ">=3.10"
 dependencies = [
     "opentelemetry-api>=1.20",
     "PyYAML>=6.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/janinishant/otel-log-span-status"
+Issues = "https://github.com/janinishant/otel-log-span-status/issues"
+Rationale = "https://www.nishantjani.com/blog/error-logs-missing-traces/"
 
 [project.optional-dependencies]
 test = [
@@ -20,6 +42,9 @@ test = [
 lint = [
     "pylint>=3",
 ]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["docs/", ".github/"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/otel_log_span_status"]
